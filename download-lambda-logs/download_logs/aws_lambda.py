@@ -42,11 +42,11 @@ class AWSLambda(Base):
 
     def send_event_to_GA(self, download_data):
         property_id = 'UA-26179049-7'
-
-        ga_client_id = download_data['ga_client_id']
+        ga_client_id = download_data['ga_client_id'] or 'No client id'
+        category = 'Download from External Source'
         filename = download_data['file_downloaded'] or 'No filename present'
         referrer = download_data['referrer'] or 'No referrer'
-        category = 'Download from External Source'
+        user_agent = download_data['user_agent'] or 'No user agent'
 
         params = urllib.parse.urlencode({
                                         'v': 1,
@@ -56,8 +56,9 @@ class AWSLambda(Base):
                                         'ec': category,
                                         'ea': filename,
                                         'el': referrer,
+                                        'cd13': user_agent,
+                                        'ua': user_agent
                                         })
-
         url = "http://www.google-analytics.com/collect?{0}".format(params)
         response = requests.post(url)
 
