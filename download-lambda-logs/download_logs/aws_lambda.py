@@ -5,6 +5,7 @@ import csv
 import requests
 import urllib.parse
 from io import TextIOWrapper
+import grequests
 
 import boto3
 s3 = boto3.client('s3')
@@ -40,7 +41,7 @@ class AWSLambda(Base):
         client_id = client_id.split(".")[-2:]
         return ".".join(client_id)
 
-    def send_event_to_GA(self, download_data):
+    def construct_url(self, download_data):
         property_id = 'UA-26179049-7'
         ga_client_id = download_data['ga_client_id'] or 'No client id'
         category = 'Download from External Source'
@@ -59,19 +60,19 @@ class AWSLambda(Base):
                                         'cd13': user_agent,
                                         'ua': user_agent
                                         })
-        url = "http://www.google-analytics.com/collect?{0}".format(params)
-        response = requests.post(url)
-
-        return response
+        return "http://www.google-analytics.com/collect?{0}".format(params)
 
     def send_events_to_GA(self):
         rows = self.process()
-
-        result = []
-
+        urls = []
         for row in rows:
             download_data = self.parse_row(row)
-            response = self.send_event_to_GA(download_data)
-            result.append(response)
+            url = self.construct_url(self, download_data)
+            urls.append(url)
 
-        return result
+        rs = [grequests.post(u) for u in urls]
+
+        return grequests.map(rs)
+
+
+
