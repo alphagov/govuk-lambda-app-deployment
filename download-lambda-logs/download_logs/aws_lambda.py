@@ -1,8 +1,7 @@
 from .base import Base
+import re
 import gzip
-import os
 import csv
-import requests
 import urllib.parse
 from io import TextIOWrapper
 import grequests
@@ -19,6 +18,25 @@ class AWSLambda(Base):
     def open_for_read(self):
         obj = s3.get_object(Bucket=self.bucket, Key=self.filename)
         return TextIOWrapper(gzip.GzipFile(fileobj=obj['Body'], mode='r'))
+
+    def transform_row(self, row):
+        try:
+            timestamp, status, file_downloaded, ip, referrer, user_agent, ga_client_id = row
+            if re.search('https://www.gov.uk/', referrer) is None:
+                return {
+                    'timestamp': timestamp,
+                    'status': status,
+                    'file_downloaded': file_downloaded,
+                    'ip': ip,
+                    'referrer': referrer,
+                    'user_agent': user_agent,
+                    'ga_client_id': ga_client_id
+                }
+            else:
+                return ""
+        except:
+            print(row)
+            raise
 
     def process(self):
         csvreader = csv.reader(self.open_for_read(), delimiter="\t")
@@ -48,6 +66,7 @@ class AWSLambda(Base):
         filename = download_data['file_downloaded'] or 'No filename present'
         referrer = download_data['referrer'] or 'No referrer'
         user_agent = download_data['user_agent'] or 'No user agent'
+        ip = download_data['ip']
 
         params = urllib.parse.urlencode({
                                         'v': 1,
@@ -57,8 +76,11 @@ class AWSLambda(Base):
                                         'ec': category,
                                         'ea': filename,
                                         'el': referrer,
+                                        'ua': user_agent,
+                                        'uip': ip,
+                                        'dr': referrer,
                                         'cd13': user_agent,
-                                        'ua': user_agent
+                                        'cd14': ga_client_id
                                         })
         return "http://www.google-analytics.com/collect?{0}".format(params)
 
@@ -73,6 +95,3 @@ class AWSLambda(Base):
         rs = [grequests.post(u) for u in urls]
 
         return grequests.map(rs)
-
-
-
