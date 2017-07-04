@@ -5,6 +5,7 @@ import csv
 import urllib.parse
 from io import TextIOWrapper
 import grequests
+from datetime import datetime
 
 import boto3
 s3 = boto3.client('s3')
@@ -59,6 +60,11 @@ class AWSLambda(Base):
         client_id = client_id.split(".")[-2:]
         return ".".join(client_id)
 
+    def calculate_time_delta(self, timestamp):
+        real_hit_time = datetime.fromtimestamp(int(timestamp))
+        timedelta = datetime.now() - real_hit_time
+        return int(timedelta.total_seconds() * 1000)
+
     def construct_url(self, download_data):
         property_id = 'UA-26179049-7'
         ga_client_id = download_data['ga_client_id'] or 'No client id'
@@ -66,7 +72,9 @@ class AWSLambda(Base):
         filename = download_data['file_downloaded'] or 'No filename present'
         referrer = download_data['referrer'] or 'No referrer'
         user_agent = download_data['user_agent'] or 'No user agent'
-        ip = download_data['ip']
+        ip = download_data['ip'] or 'No IP'
+        timestamp = download_data['timestamp'] or datetime.now()
+        latency = self.calculate_time_delta(timestamp)
 
         params = urllib.parse.urlencode({
                                         'v': 1,
@@ -80,7 +88,8 @@ class AWSLambda(Base):
                                         'uip': ip,
                                         'dr': referrer,
                                         'cd13': user_agent,
-                                        'cd14': ga_client_id
+                                        'cd14': ga_client_id,
+                                        'qt': latency
                                         })
         return "http://www.google-analytics.com/collect?{0}".format(params)
 

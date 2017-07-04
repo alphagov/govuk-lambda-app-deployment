@@ -87,7 +87,7 @@ def test_parse_client_id():
     assert_equal(client_id, expected)
 
 
-def test_mock_construct_url():
+def test_construct_url():
     property_id = 'UA-26179049-7'
     ga_client_id = '1111111111.1111111111'
     user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586'
@@ -106,10 +106,11 @@ def test_mock_construct_url():
     aws_lambda = AWSLambda("MockBucket", "2017-05-26T10-00-00.000-wZe41G6PdJYziQ8AAAAA.log")
 
     url = aws_lambda.construct_url(download_data)
+    latency = aws_lambda.calculate_time_delta(download_data['timestamp'])
 
     params = urllib.parse.urlencode({
                                     'v': 1,
-                                    'tid': 'UA-26179049-7',
+                                    'tid': property_id,
                                     'cid': ga_client_id,
                                     't': 'event',
                                     'ec': 'Download from External Source',
@@ -119,14 +120,15 @@ def test_mock_construct_url():
                                     'uip': ip,
                                     'dr': referrer,
                                     'cd13': user_agent,
-                                    'cd14': ga_client_id
+                                    'cd14': ga_client_id,
+                                    'qt': latency
                                     })
     expected_url = "http://www.google-analytics.com/collect?{0}".format(params)
 
     assert_equal(url, expected_url)
 
 
-def test_mock_send_events_to_GA():
+def test_send_events_to_GA():
     processed_values = [{'timestamp': '1495792859',
                          'status': '200',
                          'file_downloaded': '/government/uploads/system/uploads/attachment_data/file/417696/Archived-information_sharing_guidance_for_practitioners_and_managers.pdf',
