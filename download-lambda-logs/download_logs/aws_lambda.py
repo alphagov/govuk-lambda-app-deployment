@@ -98,7 +98,7 @@ class AWSLambda(Base):
         urls = []
         for row in rows:
             download_data = self.parse_row(row)
-            url = self.construct_url(self, download_data)
+            url = self.construct_url(download_data)
             urls.append(url)
 
         rs = [grequests.post(u) for u in urls]
