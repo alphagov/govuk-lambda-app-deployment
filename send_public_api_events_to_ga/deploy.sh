@@ -6,7 +6,7 @@ virtualenv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
 
-zip -r function.zip send_public_api_events_to_ga.py -x *.pyc -x *.log -x *.txt.gz
+zip -r function.zip send_public_api_events_to_ga.py -x *.pyc -x *.log -x *.txt.gz -x test_requirements.txt
 (
   cd .venv/lib/python3.6/site-packages
   zip -r ../../../../function.zip * -x *.pyc

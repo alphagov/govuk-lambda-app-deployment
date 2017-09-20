@@ -7,9 +7,15 @@ It is triggered by `ObjectCreated` events on the bucket, it will only process S3
 ### Deployment
 
 Python 3.6 is required to deploy this lambda.
-If you don't have 3.6, [pyenv](https://github.com/pyenv/pyenv) is a useful library for Python version management.
+If you don't have 3.6, [pyenv](https://github.com/pyenv/pyenv) is a useful library for Python version management:
 
-You'll also need to install and configure the AWS CLI with the appropriate credentials.
+```
+pyenv install 3.6.0
+pyenv local 3.6.0
+pip install virtualenv
+```
+
+You'll also need to install and configure the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) with the appropriate credentials.
 
 The deploy script will create a virtualenv, install dependencies and publish the lambda to AWS.
 
@@ -19,8 +25,15 @@ The deploy script will create a virtualenv, install dependencies and publish the
 
 ### Tests
 
-```
-pip install nosetest # You only need to do this once.
+Install test dependencies:
 
-nosetest test_send_public_api_events_to_ga.py
+```
+pip install -r requirements.txt
+pip install -r test_requirements.txt
+```
+
+Run the tests:
+
+```
+nosetests test_send_public_api_events_to_ga.py
 ```
