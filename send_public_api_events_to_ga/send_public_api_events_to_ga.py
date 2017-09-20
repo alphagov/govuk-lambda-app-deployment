@@ -44,16 +44,16 @@ def send_events_to_GA(s3_object):
         timestamp, status, path, ip, referrer, user_agent, ga_client_id = row
         timestamp = timestamp or int(round(datetime.now().timestamp()))
         params = urllib.parse.urlencode({
-	    'v': 1,
-	    'tid': 'UA-26179049-14',
-	    'cid': ga_client_id or 'No client ID present',
-	    't': 'event',
-	    'ec': 'Public API request',
-	    'ea': path or 'No path present',
-	    'el': referrer or 'No referrer present',
-	    'ua': user_agent or 'No user agent present',
-	    'qt': calculate_time_delta(timestamp)
-	})
+            'v': 1,
+            'tid': 'UA-26179049-14', # FIXME: This should be an env var
+            'cid': ga_client_id,
+            't': 'event',
+            'ec': 'Public API request',
+            'ea': path,
+            'el': referrer,
+            'ua': user_agent,
+            'qt': calculate_time_delta(timestamp)
+        })
         url = "http://www.google-analytics.com/collect?{0}".format(params)
         urls.append(url)
 
