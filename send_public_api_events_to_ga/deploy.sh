@@ -22,6 +22,11 @@ rm *.whl
 )
 rm -rf wheelhouse
 
-aws lambda update-function-code --function-name SendPublicAPIEventsToGA --zip-file fileb://function.zip --publish
+# Manual way to deploy lambda function code
+# aws lambda update-function-code --function-name SendPublicAPIEventsToGA --zip-file fileb://function.zip --publish
+
+# Deploy this to a specific S3 bucket for execution.
+# See alphagov/govuk-terraform-provisioning/projects/analytics_lambdas
+aws s3 cp function.zip s3://govuk-analytics-logs-production/send_public_api_events_to_ga_lambda.zip
 
 rm function.zip
