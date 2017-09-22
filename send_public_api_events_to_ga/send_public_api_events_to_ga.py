@@ -3,6 +3,7 @@ import csv
 import grequests
 import gzip
 import io
+import os
 import re
 import urllib
 
@@ -35,7 +36,7 @@ def calculate_time_delta(timestamp):
     return int(timedelta.total_seconds() * 1000)
 
 def open_for_read(s3_object):
-  return io.TextIOWrapper(gzip.GzipFile(fileobj=s3_object['Body'], mode='r'))
+    return io.TextIOWrapper(gzip.GzipFile(fileobj=s3_object['Body'], mode='r'))
 
 def send_events_to_GA(s3_object):
     urls = []
@@ -45,12 +46,14 @@ def send_events_to_GA(s3_object):
         timestamp = timestamp or int(round(datetime.now().timestamp()))
         params = urllib.parse.urlencode({
             'v': 1,
-            'tid': 'UA-26179049-14', # FIXME: This should be an env var
+            'tid': os.getenv('TRACKING_ID', 'UA-26179049-14'), # FIXME: Add value to env.
             'cid': ga_client_id,
-            't': 'event',
-            'ec': 'Public API request',
-            'ea': path,
-            'el': referrer,
+            't': 'pageview',
+            'uip': ip,
+            'aip': 1,
+            'ds': 'Public API request',
+            'dp': path,
+            'dr': referrer,
             'ua': user_agent,
             'qt': calculate_time_delta(timestamp)
         })
