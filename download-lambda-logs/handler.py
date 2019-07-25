@@ -4,7 +4,7 @@ from urllib.parse import unquote
 from download_logs.aws_lambda import AWSLambda
 
 EVENT_REGEX = re.compile(r'^ObjectCreated:')
-DOWNLOAD_REGEX = re.compile(r'^whitehall_assets/')
+DOWNLOAD_REGEX = re.compile(r'^assets/')
 
 
 def handle_lambda(event, context):
