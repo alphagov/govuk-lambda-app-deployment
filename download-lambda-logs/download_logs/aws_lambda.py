@@ -23,6 +23,13 @@ class AWSLambda(Base):
     def transform_row(self, row):
         try:
             timestamp, status, file_downloaded, ip, referrer, user_agent, ga_client_id = row
+
+            # We do this because this lambda is only designed to track access
+            # to an asset directly not via GOV.UK, because the latter can be
+            # tracked on GOV.UK as a click event.
+            if re.search('https://www.gov.uk/', referrer):
+                return ""
+
             return {
                 'timestamp': timestamp,
                 'status': status,
