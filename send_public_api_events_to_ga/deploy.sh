@@ -8,11 +8,11 @@ pip install -r requirements.txt
 
 zip -r function.zip send_public_api_events_to_ga.py -x *.pyc -x *.log -x *.txt.gz -x test_requirements.txt
 (
-  cd .venv/lib/python3.6/site-packages
+  cd .venv/lib/python3.7/site-packages
   zip -r ../../../../function.zip * -x *.pyc
 )
 
-pip download --platform manylinux1_x86_64 --only-binary :all: --abi cp36m $(cat binary_requirements.txt)
+pip download --platform manylinux1_x86_64 --only-binary :all: --abi cp37m $(cat binary_requirements.txt)
 mkdir -p wheelhouse
 ls *.whl | xargs -I '{}' -n1 unzip {} -d wheelhouse
 rm *.whl
